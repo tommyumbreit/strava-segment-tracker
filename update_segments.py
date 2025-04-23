@@ -46,21 +46,26 @@ def refresh_strava_token():
 
 # --- Get Segment Stats from Strava ---
 def get_strava_segment_stats(segment_id, access_token):
-    """
-    Fetch segment stats from Strava API (effort_count and athlete_count).
-    """
     url = f"https://www.strava.com/api/v3/segments/{segment_id}"
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get(url, headers=headers)
-    data = response.json()
-    berlin_time = datetime.now(timezone('Europe/Berlin')).strftime("%Y-%m-%d %H:%M:%S")
+
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch segment {segment_id}. Status: {response.status_code}")
+
+    try:
+        data = response.json()
+    except Exception:
+        raise Exception("Failed to parse Strava API response as JSON.")
+
     return {
         "segment_id": data["id"],
         "segment_name": data["name"],
         "effort_count": data["effort_count"],
         "athlete_count": data["athlete_count"],
-        "timestamp": berlin_time
+        "timestamp": datetime.now(timezone("Europe/Berlin")).strftime("%Y-%m-%d %H:%M:%S")
     }
+
 
 # --- Update Google Sheets with Segment Data ---
 def update_google_sheet(segment_data):
