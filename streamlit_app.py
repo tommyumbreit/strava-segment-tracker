@@ -50,24 +50,25 @@ if not df.empty:
 
         st.subheader(f"Segment: {df_sel['segment_name'].iloc[-1]}")
 
-        # --- Altair Chart für Effort Count ---
+        # --- Altair Chart für Effort Count (nur Y-Achse interaktiv) ---
         st.markdown("### 📈 Effort Count")
         chart_effort = alt.Chart(df_sel).mark_line(point=True).encode(
             x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
-            y=alt.Y("effort_count:Q", title="Effort Count"),
+            y=alt.Y("effort_count:Q", title="Effort Count", scale=alt.Scale(domain=[df_sel['effort_count'].min(), df_sel['effort_count'].max()])),
             tooltip=["timestamp:T", "effort_count"]
-        ).properties(width="container").interactive()  # <--- hier!
+        ).properties(width="container").interactive()  # Nur vertikale Interaktivität aktiviert
 
         st.altair_chart(chart_effort, use_container_width=True)
 
-        # --- Altair Chart für Athlete Count ---
+        # --- Altair Chart für Athlete Count (nur Y-Achse interaktiv) ---
         st.markdown("### 🧍‍♂️ Athlete Count")
         chart_athletes = alt.Chart(df_sel).mark_line(point=True).encode(
             x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
-            y=alt.Y("athlete_count:Q", title="Athlete Count"),
+            y=alt.Y("athlete_count:Q", title="Athlete Count", scale=alt.Scale(domain=[df_sel['athlete_count'].min(), df_sel['athlete_count'].max()])),
             tooltip=["timestamp:T", "athlete_count"]
-        ).properties(width="container").interactive()  # <--- hier!
+        ).properties(width="container").interactive()  # Nur vertikale Interaktivität aktiviert
 
         st.altair_chart(chart_athletes, use_container_width=True)
+
 else:
     st.info("No data yet. The background fetch script hasn't populated the sheet.")
