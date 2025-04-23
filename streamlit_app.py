@@ -56,7 +56,7 @@ if not df.empty:
             x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
             y=alt.Y("effort_count:Q", title="Effort Count"),
             tooltip=["timestamp:T", "effort_count"]
-        ).properties(width="container")
+        ).properties(width="container").interactive()  # <--- hier!
 
         st.altair_chart(chart_effort, use_container_width=True)
 
@@ -66,7 +66,7 @@ if not df.empty:
             x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
             y=alt.Y("athlete_count:Q", title="Athlete Count"),
             tooltip=["timestamp:T", "athlete_count"]
-        ).properties(width="container")
+        ).properties(width="container").interactive()  # <--- hier!
 
         st.altair_chart(chart_athletes, use_container_width=True)
 else:
