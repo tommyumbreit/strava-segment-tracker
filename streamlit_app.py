@@ -1,99 +1,51 @@
-import json
 import streamlit as st
-import requests
-import gspread
 import pandas as pd
-import plotly.express as px
+import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
-import os
-from token_handler import refresh_access_token
+import json
 
-# 🔐 Secrets laden
-CLIENT_ID = st.secrets["STRAVA_CLIENT_ID"]
-CLIENT_SECRET = st.secrets["STRAVA_CLIENT_SECRET"]
-REFRESH_TOKEN = st.secrets["STRAVA_REFRESH_TOKEN"]
-SEGMENT_IDS = st.secrets["SEGMENT_IDS"]
-
-# Google Sheets / Drive Zugriff
+# --- Google Sheets Auth ---
 scope = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
 ]
 
-# Zugriff auf secrets
 google_secret = st.secrets["google_service_account"]
 creds_dict = {key: value for key, value in google_secret.items()}
 creds_json = json.dumps(creds_dict)
-
-# Temporäre Credentials aus secrets erzeugen
 creds = ServiceAccountCredentials.from_json_keyfile_dict(json.loads(creds_json), scope)
+gc = gspread.authorize(creds)
 
-# 📊 Google Sheets Setup
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-client = gspread.authorize(creds)
-sheet = client.open("strava-segment-tracker").sheet1
+sheet = gc.open_by_key(st.secrets["GOOGLE_SHEET_ID"])
+worksheet = sheet.sheet1
 
-def get_segment_stats(segment_id, token):
-    url = f"https://www.strava.com/api/v3/segments/{segment_id}"
-    headers = {"Authorization": f"Bearer {token}"}
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        name = data['name']
-        stats = data['athlete_segment_stats']
-        return name, stats['effort_count'], stats['athlete_count']
-    else:
-        st.warning(f"Fehler bei Segment {segment_id}: {response.status_code}")
-        return None, None, None
-
-def log_stats(segment_id, segment_name, effort, athletes):
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    sheet.append_row([segment_id, segment_name, now, effort, athletes])
-
+# --- Load existing data ---
 def load_data():
-    data = sheet.get_all_records()
-    df = pd.DataFrame(data)
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    records = worksheet.get_all_records()
+    df = pd.DataFrame(records)
+    if 'timestamp' in df.columns:
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+    else:
+        st.warning("⚠️ No 'timestamp' column found in data.")
     return df
 
-params = st.query_params
-if "run" in params and params["run"] == "auto":
-    token = refresh_access_token()
-    for seg_id in SEGMENT_IDS.split(","):
-        seg_id = seg_id.strip()
-        name, effort, athletes = get_segment_stats(seg_id, token)
-        if name:
-            log_stats(seg_id, name, effort, athletes)
-    st.stop()
-
-st.title("📊 Strava Multi-Segment Tracker")
-
-if st.button("🚴‍♂️ Jetzt alle Segmente abfragen & speichern"):
-    token = refresh_access_token()
-    for seg_id in SEGMENT_IDS.split(","):
-        seg_id = seg_id.strip()
-        name, effort, athletes = get_segment_stats(seg_id, token)
-        if name:
-            log_stats(seg_id, name, effort, athletes)
-            st.success(f"{name} gespeichert: Efforts={effort}, Athletes={athletes}")
+# --- Streamlit UI ---
+st.set_page_config(layout="wide")
+st.title("📈 Strava Segment Tracker Dashboard")
 
 df = load_data()
+
 if not df.empty:
-    st.subheader("🔍 Verlauf je Segment")
-    selected = st.selectbox("Segment auswählen", df["segment_name"].unique())
+    with st.expander("📊 Show Time Series", expanded=True):
+        segment_options = sorted(df['segment_id'].unique())
+        selected_id = st.selectbox("Select Segment", segment_options)
+        df_sel = df[df['segment_id'] == selected_id]
 
-    seg_df = df[df["segment_name"] == selected]
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("**Effort Count**")
-        fig1 = px.line(seg_df, x='timestamp', y='effort_count', markers=True)
-        st.plotly_chart(fig1, use_container_width=True)
-
-    with col2:
-        st.markdown("**Athlete Count**")
-        fig2 = px.line(seg_df, x='timestamp', y='athlete_count', markers=True)
-        st.plotly_chart(fig2, use_container_width=True)
+        st.subheader(f"Segment: {df_sel['segment_name'].iloc[-1]}")
+        st.line_chart(
+            df_sel.set_index("timestamp")[["effort_count", "athlete_count"]],
+            use_container_width=True
+        )
 else:
-    st.info("Noch keine Daten vorhanden.")
+    st.info("No data yet. The background fetch script hasn't populated the sheet.")
