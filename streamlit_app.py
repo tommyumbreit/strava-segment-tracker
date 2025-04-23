@@ -1,3 +1,4 @@
+import json
 import streamlit as st
 import requests
 import gspread
@@ -14,9 +15,16 @@ CLIENT_SECRET = st.secrets["STRAVA_CLIENT_SECRET"]
 REFRESH_TOKEN = st.secrets["STRAVA_REFRESH_TOKEN"]
 SEGMENT_IDS = st.secrets["SEGMENT_IDS"]
 
+# Zugriff auf secrets
+google_secret = st.secrets["google_service_account"]
+creds_dict = {key: value for key, value in google_secret.items()}
+creds_json = json.dumps(creds_dict)
+
+# Temporäre Credentials aus secrets erzeugen
+creds = ServiceAccountCredentials.from_json_keyfile_dict(json.loads(creds_json), scope)
+
 # 📊 Google Sheets Setup
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
 client = gspread.authorize(creds)
 sheet = client.open("strava-segment-tracker").sheet1
 
