@@ -2,7 +2,7 @@ import requests
 import gspread
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 # --- Google Sheets Authentication ---
@@ -56,7 +56,7 @@ def get_strava_segment_stats(segment_id, access_token):
         "segment_name": data["name"],
         "effort_count": data["effort_count"],
         "athlete_count": data["athlete_count"],
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()  # UTC aware timestamp
     }
 
 # --- Update Google Sheets with Segment Data ---
