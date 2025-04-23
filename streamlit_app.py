@@ -31,6 +31,10 @@ def load_data():
     return df
 
 # --- Streamlit UI ---
+
+st.cache_data.clear()  # Löscht den Cache von Streamlit Cloud
+
+
 st.set_page_config(layout="wide")
 st.title("📈 Strava Segment Tracker Dashboard")
 

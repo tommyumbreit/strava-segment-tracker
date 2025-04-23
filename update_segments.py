@@ -73,8 +73,8 @@ def update_google_sheet(segment_data):
 # --- Main Function to Fetch and Update Segment Data ---
 def main():
     segment_ids = [
-        1234567,  # Replace with actual segment IDs
-        7654321   # Add as many as needed
+        10515763,  # South Park Line 
+        18513962   # Bikespielwiese
     ]
 
     # Refresh the Strava token
