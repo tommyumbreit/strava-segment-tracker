@@ -44,7 +44,11 @@ if not df.empty:
 
         st.subheader(f"Segment: {df_sel['segment_name'].iloc[-1]}")
         st.line_chart(
-            df_sel.set_index("timestamp")[["effort_count", "athlete_count"]],
+            df_sel.set_index("timestamp")[["effort_count"]],
+            use_container_width=True
+        )
+        st.line_chart(
+            df_sel.set_index("timestamp")[["athlete_count"]],
             use_container_width=True
         )
 else:
