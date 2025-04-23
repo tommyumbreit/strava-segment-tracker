@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
@@ -27,9 +28,7 @@ def load_data():
     return df
 
 # --- Streamlit UI ---
-
-st.cache_data.clear()  # Löscht den Cache von Streamlit Cloud
-
+st.cache_data.clear()
 
 st.set_page_config(layout="wide")
 st.title("📈 Strava Segment Tracker Dashboard")
@@ -38,14 +37,38 @@ df = load_data()
 
 if not df.empty:
     with st.expander("📊 Show Time Series", expanded=True):
-        segment_options = sorted(df['segment_id'].unique())
-        selected_id = st.selectbox("Select Segment", segment_options)
-        df_sel = df[df['segment_id'] == selected_id]
+        df["segment_label"] = df["segment_id"].astype(str) + " - " + df["segment_name"]
+        unique_segments = df[["segment_id", "segment_name", "segment_label"]].drop_duplicates()
+        segment_options = sorted(unique_segments["segment_label"].tolist())
+
+        selected_label = st.selectbox("Select Segment", segment_options)
+        selected_id = int(selected_label.split(" - ")[0])
+        df_sel = df[df["segment_id"] == selected_id].copy()
+
+        df_sel["timestamp"] = pd.to_datetime(df_sel["timestamp"])
+        df_sel.sort_values("timestamp", inplace=True)
 
         st.subheader(f"Segment: {df_sel['segment_name'].iloc[-1]}")
-        st.line_chart(
-            df_sel.set_index("timestamp")[["effort_count", "athlete_count"]],
-            use_container_width=True
-        )
+
+        # --- Altair Chart für Effort Count (nur Y-Achse interaktiv) ---
+        st.markdown("### 📈 Effort Count")
+        chart_effort = alt.Chart(df_sel).mark_line(point=True).encode(
+            x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
+            y=alt.Y("effort_count:Q", title="Effort Count", scale=alt.Scale(domain=[df_sel['effort_count'].min(), df_sel['effort_count'].max()])),
+            tooltip=["timestamp:T", "effort_count"]
+        ).properties(width="container").interactive()  # Nur vertikale Interaktivität aktiviert
+
+        st.altair_chart(chart_effort, use_container_width=True)
+
+        # --- Altair Chart für Athlete Count (nur Y-Achse interaktiv) ---
+        st.markdown("### 🧍‍♂️ Athlete Count")
+        chart_athletes = alt.Chart(df_sel).mark_line(point=True).encode(
+            x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
+            y=alt.Y("athlete_count:Q", title="Athlete Count", scale=alt.Scale(domain=[df_sel['athlete_count'].min(), df_sel['athlete_count'].max()])),
+            tooltip=["timestamp:T", "athlete_count"]
+        ).properties(width="container").interactive()  # Nur vertikale Interaktivität aktiviert
+
+        st.altair_chart(chart_athletes, use_container_width=True)
+
 else:
     st.info("No data yet. The background fetch script hasn't populated the sheet.")
