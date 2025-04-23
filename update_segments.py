@@ -85,10 +85,9 @@ def main():
 
     # Loop through the segment IDs, fetch stats, and update Google Sheets
     for segment_id in segment_ids:
-        print(f"Fetching stats for segment ID {segment_id}")
         stats = get_strava_segment_stats(segment_id, access_token)
         update_google_sheet(stats)
-        print(f"Updated Google Sheet with stats for segment: {stats['segment_name']}")
+
 
 if __name__ == "__main__":
     main()
