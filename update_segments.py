@@ -83,9 +83,14 @@ def update_google_sheet(segment_data):
 # --- Main Function to Fetch and Update Segment Data ---
 def main():
     segment_ids = [
-        10515763,   # South Park Line 
-        18513962,   # Bikespielwiese
-        8133978     # Bucktrail
+        10515763,    # South Park Line - Nürnberg
+        18513962,    # Bikespielwiese - Nürnberg
+        8133978,     # Bucktrail - Nürnberg
+        5566759,     # Sketchy Downhill - Nürnberg
+        10515526,    # Dreierline - Nürnberg
+        21125079,    # Prickelpit (alt) - Nürnberg
+        10828939,    # Wurzeltrail - Nürnberg
+        10516019     # Snake-Line - Nürnberg
     ]
 
     # Refresh the Strava token
