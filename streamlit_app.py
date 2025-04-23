@@ -43,10 +43,14 @@ if not df.empty:
         df_sel = df[df['segment_id'] == selected_id]
 
         st.subheader(f"Segment: {df_sel['segment_name'].iloc[-1]}")
+
+        st.markdown("### 📈 Effort Count")
         st.line_chart(
             df_sel.set_index("timestamp")[["effort_count"]],
             use_container_width=True
         )
+
+        st.markdown("### 🧍‍♂️ Athlete Count")
         st.line_chart(
             df_sel.set_index("timestamp")[["athlete_count"]],
             use_container_width=True
