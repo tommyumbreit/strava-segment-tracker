@@ -2,7 +2,8 @@ import requests
 import gspread
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime, timezone
+from datetime import datetime
+from pytz import timezone
 import json
 import streamlit as st
 
@@ -26,7 +27,7 @@ scope = [
 STRAVA_CLIENT_ID = st.secrets["STRAVA_CLIENT_ID"]
 STRAVA_CLIENT_SECRET = st.secrets["STRAVA_CLIENT_SECRET"]
 STRAVA_REFRESH_TOKEN = st.secrets["STRAVA_REFRESH_TOKEN"]
-GOOGLE_SHEET_ID = st.secrets["GOOGLE_SHEET_ID"]
+GOOGLE_SHEET_ID = st.secrets["general"]["GOOGLE_SHEET_ID"]
 
 # --- Refresh Strava Access Token ---
 def refresh_strava_token():
@@ -52,12 +53,13 @@ def get_strava_segment_stats(segment_id, access_token):
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get(url, headers=headers)
     data = response.json()
+    berlin_time = datetime.now(timezone('Europe/Berlin')).strftime("%Y-%m-%d %H:%M:%S")
     return {
         "segment_id": data["id"],
         "segment_name": data["name"],
         "effort_count": data["effort_count"],
         "athlete_count": data["athlete_count"],
-        "timestamp": datetime.now(timezone.utc).isoformat()  # UTC aware timestamp
+        "timestamp": berlin_time
     }
 
 # --- Update Google Sheets with Segment Data ---
