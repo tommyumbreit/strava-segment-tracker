@@ -4,6 +4,7 @@ import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime, timezone
 import json
+import streamlit as st
 
 # --- Google Sheets Authentication ---
 def load_google_secrets():
@@ -22,10 +23,10 @@ scope = [
 ]
 
 # --- Strava API Setup ---
-STRAVA_CLIENT_ID = "your_client_id"
-STRAVA_CLIENT_SECRET = "your_client_secret"
-STRAVA_REFRESH_TOKEN = "your_refresh_token"
-GOOGLE_SHEET_ID = "your_google_sheet_id"
+STRAVA_CLIENT_ID = st.secrets["STRAVA_CLIENT_ID"]
+STRAVA_CLIENT_SECRET = st.secrets["STRAVA_CLIENT_SECRET"]
+STRAVA_REFRESH_TOKEN = st.secrets["STRAVA_REFRESH_TOKEN"]
+GOOGLE_SHEET_ID = st.secrets["GOOGLE_SHEET_ID"]
 
 # --- Refresh Strava Access Token ---
 def refresh_strava_token():

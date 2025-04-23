@@ -17,17 +17,13 @@ creds_json = json.dumps(creds_dict)
 creds = ServiceAccountCredentials.from_json_keyfile_dict(json.loads(creds_json), scope)
 gc = gspread.authorize(creds)
 
-sheet = gc.open_by_key(st.secrets["GOOGLE_SHEET_ID"])
+sheet = gc.open_by_key(st.secrets["general"]["GOOGLE_SHEET_ID"])
 worksheet = sheet.sheet1
 
 # --- Load existing data ---
 def load_data():
     records = worksheet.get_all_records()
     df = pd.DataFrame(records)
-    if 'timestamp' in df.columns:
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
-    else:
-        st.warning("⚠️ No 'timestamp' column found in data.")
     return df
 
 # --- Streamlit UI ---
