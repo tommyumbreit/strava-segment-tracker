@@ -57,8 +57,8 @@ def load_data():
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     return df
 
-query_params = st.experimental_get_query_params()
-if "run" in query_params and query_params["run"][0] == "auto":
+params = st.query_params
+if "run" in params and params["run"] == "auto":
     token = refresh_access_token()
     for seg_id in SEGMENT_IDS.split(","):
         seg_id = seg_id.strip()
