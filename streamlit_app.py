@@ -15,6 +15,12 @@ CLIENT_SECRET = st.secrets["STRAVA_CLIENT_SECRET"]
 REFRESH_TOKEN = st.secrets["STRAVA_REFRESH_TOKEN"]
 SEGMENT_IDS = st.secrets["SEGMENT_IDS"]
 
+# Google Sheets / Drive Zugriff
+scope = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
 # Zugriff auf secrets
 google_secret = st.secrets["google_service_account"]
 creds_dict = {key: value for key, value in google_secret.items()}
