@@ -84,13 +84,28 @@ def update_google_sheet(segment_data):
 def main():
     segment_ids = [
         10515763,    # South Park Line - Nürnberg
+        19267099,   # SouthPark (ebike) - Nürnberg
         18513962,    # Bikespielwiese (Pirate) - Nürnberg
+        21015289,   # Pirat (ebike) - Nürnberg
         8133978,     # Bucktrail - Nürnberg
+        21015374,   # Hard Enduro Zweite Hälfte (ebike Bucktrail) - Nürnberg
         5566759,     # Sketchy Downhill (Kangaroo) - Nürnberg
         10515526,    # Dreierline - Nürnberg
         21125079,    # Prickelpit (alt) - Nürnberg
+        36673576,   # Prickel-Pit-Trail  (ebike) - Nürnberg
+        29428315,   # Yoli Line eBike - Nürnberg
+        29428229,   # Jägertrail eBike (Räubertrail) - Nürnberg
         10828939,    # Wurzeltrail ("Teufelstisch") - Nürnberg
-        10516019     # Snake-Line (Soul Kitchen) - Nürnberg
+        10516019,     # Snake-Line (Soul Kitchen) - Nürnberg
+        23180608,   # E-Schlange 2020 - Nürnberg
+        8442428,    # Rothenberg_Höllenritt - Schnaittach
+        23690264,   # e_hoellenritt_95percent - Schnaittach
+        10874261,   # frängmän_enduro - Schnaittach
+        36790585,   # E-Frängmän New line - Schnaittach
+        9097172,    # Enzenstein_Höllenritt - Schnaittach
+        23689715,   # e_enzenstein_80percent - Schnaittach
+        11082443,   # die_birke_enduro - Schnaittach
+        35376142    # E-Birke new - Schnaittach
     ]
 
     # Refresh the Strava token
