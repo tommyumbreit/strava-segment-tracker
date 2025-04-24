@@ -94,6 +94,7 @@ def main():
         21125079,    # Prickelpit (alt) - Nürnberg
         36673576,   # Prickel-Pit-Trail  (ebike) - Nürnberg
         29428315,   # Yoli Line eBike - Nürnberg
+        12420535,   # Naturtrail (Räubertrail?) - Nürnberg
         29428229,   # Jägertrail eBike (Räubertrail) - Nürnberg
         10828939,    # Wurzeltrail ("Teufelstisch") - Nürnberg
         10516019,     # Snake-Line (Soul Kitchen) - Nürnberg
