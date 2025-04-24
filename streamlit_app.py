@@ -5,6 +5,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
+import locale
 
 # --- Google Sheets Auth ---
 scope = [
@@ -31,39 +32,59 @@ def load_data():
 st.cache_data.clear()
 st.set_page_config(layout="wide")
 
-# --- Language Toggle ---
-lang = st.radio("Language / Sprache", ["English", "Deutsch"], horizontal=True)
+# --- Language Toggle (English default) ---
+lang = st.radio("Language / Sprache", ["English", "Deutsch"], horizontal=True, index=0)
 
 T = {
     "title": {
-        "Deutsch": "📈 Strava Segment Tracker Dashboard",
-        "English": "📈 Strava Segment Tracker Dashboard"
+        "English": "📈 Strava Segment Tracker Dashboard",
+        "Deutsch": "📈 Strava Segment Tracker Dashboard"
     },
     "expander": {
-        "Deutsch": "📊 Zeitreihe anzeigen",
-        "English": "📊 Show Time Series"
+        "English": "📊 Show Time Series",
+        "Deutsch": "📊 Zeitreihe anzeigen"
     },
     "selectbox": {
-        "Deutsch": "Segment auswählen",
-        "English": "Select Segment"
+        "English": "Select Segment",
+        "Deutsch": "Segment auswählen"
     },
     "effort_title": {
-        "Deutsch": "📈 Anzahl der Fahrten – Wie oft wurde das Segment gefahren?",
-        "English": "📈 Effort Count – How often was the segment ridden?"
+        "English": "📈 Effort Count – How often was the segment ridden?",
+        "Deutsch": "📈 Anzahl der Fahrten – Wie oft wurde das Segment gefahren?"
     },
     "athlete_title": {
-        "Deutsch": "🧍‍♂️ Anzahl der Athleten – Wie viele verschiedene Personen sind das Segment gefahren?",
-        "English": "🧍‍♂️ Athlete Count – How many unique athletes completed the segment?"
+        "English": "🧍‍♂️ Athlete Count – How many unique athletes completed the segment?",
+        "Deutsch": "🧍‍♂️ Anzahl der Athleten – Wie viele verschiedene Personen haben das Segment gefahren?"
     },
     "no_data": {
-        "Deutsch": "Noch keine Daten vorhanden. Das Hintergrundskript hat das Sheet noch nicht befüllt.",
-        "English": "No data yet. The background fetch script hasn't populated the sheet."
+        "English": "No data yet. The background fetch script hasn't populated the sheet.",
+        "Deutsch": "Noch keine Daten vorhanden. Das Hintergrundskript hat das Sheet noch nicht befüllt."
     },
     "segment": lambda name: {
-        "Deutsch": f"Segment: {name}",
-        "English": f"Segment: {name}"
-    }
+        "English": f"Segment: {name}",
+        "Deutsch": f"Segment: {name}"
+    },
+    "timestamp_axis": {
+        "English": "Date & Time",
+        "Deutsch": "Datum & Uhrzeit"
+    },
+    "effort_axis": {
+        "English": "Effort Count",
+        "Deutsch": "Anzahl der Fahrten"
+    },
+    "athlete_axis": {
+        "English": "Athlete Count",
+        "Deutsch": "Anzahl der Athleten"
+    },
 }
+
+# Dynamisches Achsen-Datumsformat mit Wochentag
+if lang == "English":
+    date_format = "%a, %b %d, %I:%M %p"  # Tue, Apr 23, 02:30 PM
+    locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
+else:
+    date_format = "%a, %d.%m. %H:%M"     # Di, 23.04. 14:30
+    locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")  # Setzt das deutsche Datumsformat
 
 st.title(T["title"][lang])
 df = load_data()
@@ -79,28 +100,37 @@ if not df.empty:
         df_sel = df[df["segment_id"] == selected_id].copy()
 
         df_sel["timestamp"] = pd.to_datetime(df_sel["timestamp"])
+
+        # Manuelle Anpassung für die Wochentage im Deutschen (kurz, wie Mo, Di, Mi...)
+        df_sel["formatted_time"] = df_sel["timestamp"].dt.strftime(date_format)
+        
         df_sel.sort_values("timestamp", inplace=True)
 
         st.subheader(T["segment"](df_sel['segment_name'].iloc[-1])[lang])
 
         # --- Effort Chart ---
         st.markdown(f"### {T['effort_title'][lang]}")
+
+        # Achse auf Basis des neuen Formats setzen (alle 12 Stunden eine Beschriftung)
         chart_effort = alt.Chart(df_sel).mark_line(point=True).encode(
-            x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
-            y=alt.Y("effort_count:Q", title="Effort Count",
+            x=alt.X("timestamp:T", title=T["timestamp_axis"][lang],
+                    axis=alt.Axis(format=date_format, labelAngle=0, tickCount="hour", labelLimit=200)),  # Alle 12 Stunden eine Beschriftung
+            y=alt.Y("effort_count:Q", title=T["effort_axis"][lang],
                     scale=alt.Scale(domain=[df_sel['effort_count'].min(), df_sel['effort_count'].max()])),
-            tooltip=["timestamp:T", "effort_count"]
+            tooltip=[alt.Tooltip("formatted_time:N", title=T["timestamp_axis"][lang]), "effort_count"]
         ).properties(width="container").interactive()
 
         st.altair_chart(chart_effort, use_container_width=True)
 
         # --- Athlete Chart ---
         st.markdown(f"### {T['athlete_title'][lang]}")
+
         chart_athletes = alt.Chart(df_sel).mark_line(point=True).encode(
-            x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
-            y=alt.Y("athlete_count:Q", title="Athlete Count",
+            x=alt.X("timestamp:T", title=T["timestamp_axis"][lang],
+                    axis=alt.Axis(format=date_format, labelAngle=0, tickCount="hour", labelLimit=200)),  # Alle 12 Stunden eine Beschriftung
+            y=alt.Y("athlete_count:Q", title=T["athlete_axis"][lang],
                     scale=alt.Scale(domain=[df_sel['athlete_count'].min(), df_sel['athlete_count'].max()])),
-            tooltip=["timestamp:T", "athlete_count"]
+            tooltip=[alt.Tooltip("formatted_time:N", title=T["timestamp_axis"][lang]), "athlete_count"]
         ).properties(width="container").interactive()
 
         st.altair_chart(chart_athletes, use_container_width=True)
