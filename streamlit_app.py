@@ -48,7 +48,7 @@ T = {
         "Deutsch": "Segment auswählen"
     },
     "effort_title": {
-        "English": "📈 Effort Count – How often was the segment ridden?",
+        "English": "📈 Effort Count – How often the segment was ridden?",
         "Deutsch": "📈 Anzahl der Fahrten – Wie oft wurde das Segment gefahren?"
     },
     "athlete_title": {
