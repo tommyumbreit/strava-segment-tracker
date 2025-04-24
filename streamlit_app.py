@@ -5,7 +5,6 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
-import locale
 
 # --- Google Sheets Auth ---
 scope = [
@@ -78,14 +77,7 @@ T = {
     },
 }
 
-# Dynamisches Achsen-Datumsformat mit Wochentag
-if lang == "English":
-    date_format = "%a, %b %d, %I:%M %p"  # Tue, Apr 23, 02:30 PM
-    locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
-else:
-    date_format = "%a, %d.%m. %H:%M"     # Di, 23.04. 14:30
-    locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")  # Setzt das deutsche Datumsformat
-
+# --- Load and format data ---
 st.title(T["title"][lang])
 df = load_data()
 
@@ -100,21 +92,24 @@ if not df.empty:
         df_sel = df[df["segment_id"] == selected_id].copy()
 
         df_sel["timestamp"] = pd.to_datetime(df_sel["timestamp"])
-
-        # Manuelle Anpassung für die Wochentage im Deutschen (kurz, wie Mo, Di, Mi...)
-        df_sel["formatted_time"] = df_sel["timestamp"].dt.strftime(date_format)
-        
         df_sel.sort_values("timestamp", inplace=True)
+
+        if lang == "English":
+            df_sel["formatted_time"] = df_sel["timestamp"].dt.strftime("%a, %b %d, %I:%M %p")
+            x_axis_format = "%b %d, %I %p"
+        else:
+            weekday_map = {0: "Mo", 1: "Di", 2: "Mi", 3: "Do", 4: "Fr", 5: "Sa", 6: "So"}
+            df_sel["weekday"] = df_sel["timestamp"].dt.weekday.map(weekday_map)
+            df_sel["formatted_time"] = df_sel["weekday"] + ", " + df_sel["timestamp"].dt.strftime("%d.%m. %H:%M")
+            x_axis_format = "%d.%m. %H:%M"
 
         st.subheader(T["segment"](df_sel['segment_name'].iloc[-1])[lang])
 
         # --- Effort Chart ---
         st.markdown(f"### {T['effort_title'][lang]}")
-
-        # Achse auf Basis des neuen Formats setzen (alle 12 Stunden eine Beschriftung)
         chart_effort = alt.Chart(df_sel).mark_line(point=True).encode(
             x=alt.X("timestamp:T", title=T["timestamp_axis"][lang],
-                    axis=alt.Axis(format=date_format, labelAngle=0, tickCount="hour", labelLimit=200)),  # Alle 12 Stunden eine Beschriftung
+                    axis=alt.Axis(format=x_axis_format, labelAngle=0, tickMinStep=43200000)),  # 12 Stunden = 43,200,000 ms
             y=alt.Y("effort_count:Q", title=T["effort_axis"][lang],
                     scale=alt.Scale(domain=[df_sel['effort_count'].min(), df_sel['effort_count'].max()])),
             tooltip=[alt.Tooltip("formatted_time:N", title=T["timestamp_axis"][lang]), "effort_count"]
@@ -124,15 +119,15 @@ if not df.empty:
 
         # --- Athlete Chart ---
         st.markdown(f"### {T['athlete_title'][lang]}")
-
         chart_athletes = alt.Chart(df_sel).mark_line(point=True).encode(
             x=alt.X("timestamp:T", title=T["timestamp_axis"][lang],
-                    axis=alt.Axis(format=date_format, labelAngle=0, tickCount="hour", labelLimit=200)),  # Alle 12 Stunden eine Beschriftung
+                    axis=alt.Axis(format=x_axis_format, labelAngle=0, tickMinStep=43200000)),
             y=alt.Y("athlete_count:Q", title=T["athlete_axis"][lang],
                     scale=alt.Scale(domain=[df_sel['athlete_count'].min(), df_sel['athlete_count'].max()])),
             tooltip=[alt.Tooltip("formatted_time:N", title=T["timestamp_axis"][lang]), "athlete_count"]
         ).properties(width="container").interactive()
 
         st.altair_chart(chart_athletes, use_container_width=True)
+
 else:
     st.info(T["no_data"][lang])
