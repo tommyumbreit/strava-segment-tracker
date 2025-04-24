@@ -12,6 +12,10 @@ A multilingual (EN/DE) dashboard and update pipeline for monitoring efforts on S
 - Optional map view of selected segment (Strava Maps)
 - Automated segment updates with Heroku scheduler
 
+## 🖼️ Preview
+
+![Dashboard Screenshot](.github/screenshot.png)
+
 ## 🚀 Live App
 
 [🔗 Open in Streamlit Cloud](https://strava-segment-tracker.streamlit.app/)
