@@ -51,7 +51,7 @@ if not df.empty:
         st.subheader(f"Segment: {df_sel['segment_name'].iloc[-1]}")
 
         # --- Altair Chart für Effort Count (nur Y-Achse interaktiv) ---
-        st.markdown("### 📈 Effort Count")
+        st.markdown("### 📈 Effort Count - How often a segment was ridden")
         chart_effort = alt.Chart(df_sel).mark_line(point=True).encode(
             x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
             y=alt.Y("effort_count:Q", title="Effort Count", scale=alt.Scale(domain=[df_sel['effort_count'].min(), df_sel['effort_count'].max()])),
@@ -61,7 +61,7 @@ if not df.empty:
         st.altair_chart(chart_effort, use_container_width=True)
 
         # --- Altair Chart für Athlete Count (nur Y-Achse interaktiv) ---
-        st.markdown("### 🧍‍♂️ Athlete Count")
+        st.markdown("### 🧍‍♂️ Athlete Count - The number of unique Strava users who have completed this segment")
         chart_athletes = alt.Chart(df_sel).mark_line(point=True).encode(
             x=alt.X("timestamp:T", title="Zeitpunkt", axis=alt.Axis(format="%d.%m. %H:%M")),
             y=alt.Y("athlete_count:Q", title="Athlete Count", scale=alt.Scale(domain=[df_sel['athlete_count'].min(), df_sel['athlete_count'].max()])),
