@@ -99,6 +99,21 @@ def main():
         10828939,    # Wurzeltrail ("Teufelstisch") - Nürnberg
         10516019,     # Snake-Line (Soul Kitchen) - Nürnberg
         23180608,   # E-Schlange 2020 - Nürnberg
+        37825663,   # BMC IGH - Heidenberg
+        36680688,   # E-BMC IGH; sponsored by ENDURO ONE - Heidenberg
+        33020302,   # Neuer Sender Trail - Heidenberg
+        33243554,   # E-Sender IGH; sponsored by SPORTZENTRUM KNAUBER - Heidenberg
+        35094269,   # Short Enduro Fit - Heidenberg
+        36680922,   # E-EnduroFit IGH; sponsored by HUMPENÖDER - Heidenberg
+        33237294,   # Hobbit Extender - Heidenberg
+        36680575,   # E-Hobbit IGH; sponsored by TREK - Heidenberg
+        7008269,    # Cäsar DH - Heidenberg
+        28211716,   # Cäsar DH E-Bike - Heidenberg
+        30242838,   # Ringelnatter - Heidenberg
+        38797901,   # Milky Way - Heidenberg
+        12544801,   # Natur Trail - Heidenberg
+        27644199,   # Naturtrail E-Bike - Heidenberg
+        17642479,   # Heidelbeerenrodeo - Heidenberg
         8442428,    # Rothenberg_Höllenritt - Schnaittach
         23690264,   # e_hoellenritt_95percent - Schnaittach
         10874261,   # frängmän_enduro - Schnaittach
